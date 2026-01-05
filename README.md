@@ -62,11 +62,13 @@ conda activate ashare
 pip install -r requirements.txt
 ```
 
-4. Prepare data directory:
+4. Prepare stock database:
 ```bash
-mkdir -p data/weekly
-# Place your weekly OHLCV data in data/weekly/ directory
-# Format: {stock_code}.csv with columns: 日期, 开盘, 最高, 最低, 收盘, 成交量
+# 更新股票基本信息数据库
+python -m scripts.update_stock_db
+
+# 数据会自动从行情平台获取并缓存到本地SQLite数据库
+# 首次运行会建立股票代码列表
 ```
 
 5. Run the application:
@@ -101,10 +103,20 @@ ashare_predict/
 │   ├── templates/          # HTML templates
 │   └── static/             # CSS, JS, images
 ├── data/                   # Data directory
-│   └── weekly/             # Weekly stock data
+│   ├── stocks.json         # Stock info (code/name/pinyin)
+│   └── stock_cache.db      # Local SQLite cache (auto-generated)
+├── scripts/                # Utility scripts
+│   └── update_stock_db.py  # Update stock database
 ├── requirements.txt        # Python dependencies
 └── README.md              # This file
 ```
+
+### Data Source
+
+The system automatically fetches stock data from:
+- **Real-time API**: Fetches weekly/daily OHLCV data on demand
+- **Local Cache**: SQLite database caches fetched data for performance
+- **Stock Database**: `stocks.json` contains basic stock information
 
 ### API Endpoints
 
@@ -197,11 +209,13 @@ conda activate ashare
 pip install -r requirements.txt
 ```
 
-4. 准备数据目录：
+4. 准备股票数据库：
 ```bash
-mkdir -p data/weekly
-# 将周线OHLCV数据放入 data/weekly/ 目录
-# 格式: {股票代码}.csv，包含列: 日期, 开盘, 最高, 最低, 收盘, 成交量
+# 更新股票基本信息数据库
+python -m scripts.update_stock_db
+
+# 数据会自动从行情平台获取并缓存到本地SQLite数据库
+# 首次运行会建立股票代码列表
 ```
 
 5. 运行应用：
@@ -214,6 +228,13 @@ python -m uvicorn app:app --host 0.0.0.0 --port 8000 --reload
 ```
 http://localhost:8000
 ```
+
+### 数据源
+
+系统自动从以下来源获取股票数据：
+- **实时API**: 按需获取周线/日线OHLCV数据
+- **本地缓存**: SQLite数据库缓存已获取数据，提高性能
+- **股票数据库**: `stocks.json` 包含股票基本信息
 
 ### 使用方法
 
@@ -236,7 +257,10 @@ ashare_predict/
 │   ├── templates/          # HTML模板
 │   └── static/             # CSS、JS、图片
 ├── data/                   # 数据目录
-│   └── weekly/             # 周线股票数据
+│   ├── stocks.json         # 股票基本信息 (代码/名称/拼音)
+│   └── stock_cache.db      # 本地SQLite缓存 (自动生成)
+├── scripts/                # 辅助脚本
+│   └── update_stock_db.py  # 更新股票数据库
 ├── requirements.txt        # Python依赖
 └── README.md              # 本文件
 ```
