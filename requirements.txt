@@ -1,0 +1,25 @@
+# FastAPI and Web Server
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+python-multipart==0.0.6
+
+# Data Processing
+pandas==2.1.4
+numpy==1.26.3
+
+# Machine Learning
+scikit-learn==1.4.0
+
+# Visualization
+matplotlib==3.8.2
+
+# HTTP Client
+requests==2.31.0
+
+# Database (for caching)
+# sqlalchemy==2.0.25
+# sqlite3 is built-in
+
+# Optional: for A-share data fetching
+# tushare==1.2.90
+# akshare==1.12.60

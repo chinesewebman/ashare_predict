@@ -1,0 +1,276 @@
+/* Stock Pattern Predictor - Custom Styles */
+
+:root {
+    --primary-color: #2563eb;
+    --secondary-color: #6c757d;
+    --success-color: #198754;
+    --danger-color: #dc3545;
+    --warning-color: #ffc107;
+    --info-color: #0dcaf0;
+    --light-bg: #f8f9fa;
+    --dark-bg: #212529;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: #f5f5f5;
+}
+
+/* Hero Section */
+.hero-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 10px;
+    margin-bottom: 2rem;
+}
+
+.hero-section h1 {
+    font-weight: 700;
+}
+
+/* Chart Icon */
+.chart-icon {
+    font-size: 1.5rem;
+}
+
+/* Search Section */
+.search-section {
+    margin-top: -1rem;
+}
+
+.search-section .card {
+    border: none;
+    border-radius: 10px;
+}
+
+#symbolInput {
+    border-radius: 8px;
+    border: 2px solid #e0e0e0;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+#symbolInput:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
+}
+
+#searchForm button .btn-text {
+    display: inline;
+}
+
+#searchForm button.loading .btn-text {
+    display: none;
+}
+
+#searchForm button.loading .spinner {
+    display: inline-block;
+}
+
+/* Results Section */
+.results-section .card {
+    border: none;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.results-section .card-header {
+    border-radius: 10px 10px 0 0 !important;
+}
+
+/* Confidence Badges */
+.confidence-high {
+    color: var(--success-color);
+    font-weight: 600;
+}
+
+.confidence-medium {
+    color: var(--warning-color);
+    font-weight: 600;
+}
+
+.confidence-low {
+    color: var(--secondary-color);
+    font-weight: 600;
+}
+
+/* Pattern Code */
+code {
+    background-color: var(--light-bg);
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+/* Examples Section */
+.examples-section {
+    padding: 1rem 0;
+}
+
+.example-btn {
+    transition: all 0.2s;
+}
+
+.example-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Footer */
+.footer {
+    border-top: 1px solid #dee2e6;
+}
+
+/* Loading Animation */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.loading-pulse {
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .hero-section h1 {
+        font-size: 1.8rem;
+    }
+
+    .hero-section p {
+        font-size: 1rem;
+    }
+
+    #searchForm button {
+        width: 100%;
+    }
+}
+
+/* Utility Classes */
+.text-success-custom {
+    color: var(--success-color) !important;
+}
+
+.text-danger-custom {
+    color: var(--danger-color) !important;
+}
+
+.bg-success-custom {
+    background-color: var(--success-color) !important;
+    color: white;
+}
+
+.bg-danger-custom {
+    background-color: var(--danger-color) !important;
+    color: white;
+}
+
+/* Table Styles */
+.table-sm td {
+    padding: 0.5rem;
+}
+
+.table-sm td:first-child {
+    width: 40%;
+}
+
+/* Button Styles */
+.btn-outline-primary {
+    transition: all 0.3s;
+}
+
+.btn-outline-primary:hover {
+    transform: translateX(5px);
+}
+
+/* Results Cards */
+.result-card {
+    border-left: 4px solid var(--primary-color);
+}
+
+.result-card.success {
+    border-left-color: var(--success-color);
+}
+
+.result-card.error {
+    border-left-color: var(--danger-color);
+}
+
+/* Search Input Validation */
+#symbolInput:invalid:not(:placeholder-shown) {
+    border-color: var(--danger-color);
+}
+
+#symbolInput:valid {
+    border-color: var(--success-color);
+}
+
+/* Smooth Scrolling */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Loading Spinner */
+.spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+    border-width: 0.15em;
+}
+
+/* Autocomplete Dropdown */
+.autocomplete-dropdown {
+    position: absolute;
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 1000;
+    margin-top: 4px;
+}
+
+.autocomplete-item {
+    padding: 12px 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background-color 0.2s;
+}
+
+.autocomplete-item:last-child {
+    border-bottom: none;
+}
+
+.autocomplete-item:hover {
+    background-color: #f8f9fa;
+}
+
+.autocomplete-item .stock-code {
+    font-weight: 600;
+    color: var(--primary-color);
+    min-width: 70px;
+}
+
+.autocomplete-item .stock-name {
+    flex: 1;
+    color: #333;
+}
+
+.autocomplete-item .stock-exchange {
+    font-size: 0.85rem;
+    color: #6c757d;
+    background: #f0f0f0;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+/* Input container for autocomplete position */
+#symbolInput {
+    position: relative;
+}

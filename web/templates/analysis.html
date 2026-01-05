@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analysis - {{ symbol }} | Stock Pattern Predictor</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <span class="chart-icon">📈</span>
+                Stock Pattern Predictor
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/" data-i18n="nav_home">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#" data-i18n="nav_analysis">Analysis</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/about" data-i18n="nav_about">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <select id="languageSelector" class="form-select form-select-sm ms-2" style="width: auto;" onchange="setLanguage(this.value)">
+                            <option value="en">English</option>
+                            <option value="zh">中文</option>
+                        </select>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container main-content py-4">
+        <!-- Back Button -->
+        <a href="/" class="btn btn-outline-secondary mb-3" data-i18n="btn_back">
+            ← Back to Search
+        </a>
+
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 data-i18n="analysis_title">Stock Analysis: {{ symbol }}</h2>
+            <div class="d-flex gap-2">
+                <!-- Quick Search -->
+                <div class="position-relative">
+                    <input type="text" class="form-control" id="quickSearchInput"
+                           placeholder="输入代码/拼音/名称 (如: jd, 京东)" style="width: 250px;">
+                    <div id="quickSearchAutocomplete" class="autocomplete-dropdown"></div>
+                </div>
+                <button class="btn btn-primary" onclick="refreshAnalysis()">
+                    <span id="refreshText" data-i18n="btn_refresh">Refresh</span>
+                    <span class="spinner spinner-border spinner-border-sm d-none" id="refreshSpinner"></span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loadingState" class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-3" data-i18n="loading_analysis">Loading analysis data...</p>
+        </div>
+
+        <!-- Error State -->
+        <div id="errorState" class="alert alert-danger" style="display: none;">
+            <h5 class="alert-heading" data-i18n="error_title">Error</h5>
+            <p id="errorMessage"></p>
+        </div>
+
+        <!-- Content State -->
+        <div id="contentState" style="display: none;">
+            <!-- Stock Info Card -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">📊 价格走势与形态点</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <p><strong data-i18n="info_symbol">Symbol:</strong> <span id="stockSymbol">-</span></p>
+                            <p><strong data-i18n="info_current_price">Current Price:</strong> ¥<span id="currentPrice">-</span></p>
+                        </div>
+                        <div class="col-md-4">
+                            <p><strong data-i18n="info_last_week">Last Data Week:</strong> <span id="lastWeek">-</span></p>
+                            <p><strong data-i18n="info_last_date">Last Date:</strong> <span id="lastDate">-</span></p>
+                        </div>
+                        <div class="col-md-4">
+                            <p><strong data-i18n="info_landmarks_count">Landmarks Found:</strong> <span id="landmarksCount">-</span></p>
+                            <p><strong>多层过滤:</strong> <span id="filterRate">-</span></p>
+                        </div>
+                    </div>
+                    <!-- Multi-layer stats badges -->
+                    <div class="row mt-2">
+                        <div class="col-12">
+                            <div class="d-flex gap-2 flex-wrap">
+                                <span class="badge" style="background: #ff6b6b; color: white;">第一层: <span id="mlLayer1">-</span></span>
+                                <span class="badge" style="background: #ffd93d; color: black;">第二层: <span id="mlLayer2">-</span></span>
+                                <span class="badge" style="background: #6bcb77; color: white;">第三层: <span id="mlLayer3">-</span></span>
+                                <span class="badge" style="background: #4d96ff; color: white;">最终: <span id="mlFinal">-</span></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Multi-Layer Filter Control Panel -->
+            <div class="card mb-4">
+                <div class="card-header bg-warning text-dark">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">🎛️ 多层地标点检测控制面板</h5>
+                        <button class="btn btn-sm btn-primary" onclick="runMultiLayerDetection()">
+                            <span id="mlUpdateText">运行检测</span>
+                            <span class="spinner spinner-border spinner-border-sm d-none" id="mlUpdateSpinner"></span>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Layer 1 -->
+                        <div class="col-md-6 mb-3">
+                            <div class="border rounded p-3" style="border-left: 4px solid #ff6b6b;">
+                                <h6 class="text-danger">第一层：ZigZag 检测</h6>
+                                <label class="form-label">阈值 (%): <span id="l1_val">10</span></label>
+                                <input type="range" class="form-range" id="layer1_threshold" min="5" max="15" value="10" step="1">
+                                <small class="text-muted">平衡灵敏度与稳定性</small>
+                            </div>
+                        </div>
+
+                        <!-- Layer 2 -->
+                        <div class="col-md-6 mb-3">
+                            <div class="border rounded p-3" style="border-left: 4px solid #ffd93d;">
+                                <h6 class="text-warning">第二层：统计确认</h6>
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <label class="form-label">最小频率: <span id="l2_freq_val">2</span></label>
+                                        <input type="range" class="form-range" id="layer2_min_freq" min="1" max="5" value="2" step="1">
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="form-label">最小偏离 (%): <span id="l2_dev_val">20</span></label>
+                                        <input type="range" class="form-range" id="layer2_min_dev" min="10" max="30" value="20" step="1">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Layer 3 -->
+                        <div class="col-md-6 mb-3">
+                            <div class="border rounded p-3" style="border-left: 4px solid #6bcb77;">
+                                <h6 class="text-success">第三层：趋势过滤</h6>
+                                <label class="form-label">趋势强度: <span id="l3_str_val">0.50</span></label>
+                                <input type="range" class="form-range" id="layer3_trend_str" min="30" max="80" value="50" step="5">
+                                <small class="text-muted">中等趋势强度</small>
+                            </div>
+                        </div>
+
+                        <!-- Layer 4 -->
+                        <div class="col-md-6 mb-3">
+                            <div class="border rounded p-3" style="border-left: 4px solid #4d96ff;">
+                                <h6 class="text-primary">第四层：时间间隔</h6>
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <label class="form-label">同类型(周): <span id="l4_same_val">10</span></label>
+                                        <input type="range" class="form-range" id="layer4_same_type" min="6" max="20" value="10" step="1">
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="form-label">交替(周): <span id="l4_alt_val">4</span></label>
+                                        <input type="range" class="form-range" id="layer4_alt" min="2" max="12" value="4" step="1">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Multi-Layer Results -->
+                    <div id="multiLayerResults" style="display: none;">
+                        <hr class="my-3">
+                        <h6>多层检测结果</h6>
+                        <div class="row text-center mb-3">
+                            <div class="col-3">
+                                <div class="p-2 rounded" style="background: #ff6b6b; color: white;">
+                                    <div class="small">第一层</div>
+                                    <div class="fw-bold" style="font-size: 1.5rem;" id="ml_layer1">-</div>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="p-2 rounded" style="background: #ffd93d; color: black;">
+                                    <div class="small">第二层</div>
+                                    <div class="fw-bold" style="font-size: 1.5rem;" id="ml_layer2">-</div>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="p-2 rounded" style="background: #6bcb77; color: white;">
+                                    <div class="small">第三层</div>
+                                    <div class="fw-bold" style="font-size: 1.5rem;" id="ml_layer3">-</div>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="p-2 rounded" style="background: #4d96ff; color: white;">
+                                    <div class="small">最终</div>
+                                    <div class="fw-bold" style="font-size: 1.5rem;" id="ml_final">-</div>
+                                </div>
+                            </div>
+                        </div>
+                        <img id="mlPlot" class="img-fluid rounded" style="max-height: 400px;">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chart Card -->
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0" data-i18n="chart_title">Price Chart with Landmarks</h5>
+                </div>
+                <div class="card-body">
+                    <div style="height: 400px; width: 100%; position: relative;">
+                        <canvas id="priceChart"></canvas>
+                    </div>
+                    <p class="text-muted mt-2 text-center">
+                        <small data-i18n="chart_hint">Green triangles = Low landmarks | Red triangles = High landmarks</small>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Landmarks Table -->
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0" data-i18n="table_title">Detected Landmarks</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead>
+                                <tr>
+                                    <th data-i18n="table_type">Type</th>
+                                    <th data-i18n="table_date">Date</th>
+                                    <th data-i18n="table_price">Price</th>
+                                    <th data-i18n="table_week_index">Week Index</th>
+                                    <th data-i18n="table_confidence">Confidence</th>
+                                    <th data-i18n="table_signals">Signals</th>
+                                </tr>
+                            </thead>
+                            <tbody id="landmarksTable">
+                                <tr>
+                                    <td colspan="6" class="text-center" data-i18n="table_no_data">No landmarks found</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer mt-5 py-3 bg-light">
+        <div class="container text-center text-muted">
+            <small data-i18n="footer_text">
+                Stock Pattern Predictor | Time-Based Sequence Analysis
+            </small>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <!-- Translations -->
+    <script src="/static/js/translations.js?v=3"></script>
+    <script>
+        // Debug translations
+        console.log('[DEBUG] translations.js loaded');
+        console.log('[DEBUG] t function test:', t('chart_legend_price'));
+        console.log('[DEBUG] Current language:', getCurrentLanguage());
+    </script>
+    <!-- Custom JS -->
+    <script src="/static/js/analysis.js?v=4"></script>
+    <script>
+        // Debug logging for page load
+        console.log('[DEBUG] Analysis page loaded');
+        console.log('[DEBUG] Symbol from template:', '{{ symbol }}');
+        console.log('[DEBUG] pathname:', window.location.pathname);
+    </script>
+</body>
+</html>
